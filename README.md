@@ -13,32 +13,45 @@
 
 ## Why do we need a harness?
 - Agents need:
-    - Work in an environment where they can take actions
-    - Connect to our data
-    - Manage growing context over long runs to avoid context overflow.
-    - Parallelize tasks: Need to be able to Parallelize tasks to complete complex tasks efficiently.
-    - Connect with a human in the loop: for sensitive workflows.
-    - Improve over time: so they remain relevant and useful
+    - Take actions in an environment: Take actions via tools, read and write files, execute code
+    - Connect to your data: Load memories, skills, and domain knowledge at the right moment
+    - Manage growing context: Summarize history and offload large results across long runs
+    - Parallelize tasks: Delegate to general or specialized subagents running in isolated context windows
+    - Stay in the loop: Pause for human approval at critical decision points
+    - Improve over time: Update memory, skills, and prompts based on real usage
 
 ## What is Deep Agents?
-- A customizable agent harness purpose built for complex, real-world tasks. There are four main capabilities of the Deep Agents harness.
-    1. Execution Environment: Backbon of a Harness
-        - Code Interpreter
-        - Sandbox
-        - FileSystem
+- Deep Agents is the easiest way to start building agents and applications that are powered by LLMs—with built-in capabilities for task planning, file systems for context management, subagent-spawning, and long-term memory. You can use deep agents for any task, including complex, multi-step tasks. There are four main capabilities of the Deep Agents harness.
+    1. Execution Environment: Backbon of a Harness. Has four layers.
+        - Tools: custom functions, APIs, and databases the agent can call
+        - Virtual filesystem: file tools backed by pluggable backends
+        - Filesystem permissions: declarative access control over which paths agents can read or write
+        - Code execution: sandboxed shell execution and an in-process JavaScript interpreter
     2. Context Management:
-        - Skills support
-        - Memory
-        - Summarization Capabilities
-        - Context Offloading
-        - Prompt Caching
+        - Skills: on-demand domain knowledge loaded progressively from skill files
+        - Memory: persistent instructions and preferences loaded at startup from AGENTS.md files
+        - Summarization and context offloading: automatic compression of conversation history and large tool results.
+            - Input context: System prompt, memory, skills, and tool prompts define what the agent starts with.
+            - Compression: Built-in offloading and summarization compress conversation history and large intermediate results.
+            - Isolation: Subagents quarantine heavy subtasks and return only final results (see Delegation).
+            - Long-term memory: Persistent storage in the virtual filesystem carries information across threads.
+        - Prompt caching: static prompt sections are cache-eligible to speed up inference and reduce cost on supported models
     3. Delegation: As agents run for longer amounts of time and take on complex workflows, they need to plan and organize tasks and then use subagents to delegate work.
-        - Planning
-        - Subagents
-    4. Steering:
-        - Human in the loop
+        - Task planning: a built-in write_todos tool for structured task tracking
+        - Subagents: The harness includes a built-in task tool that lets the main agent create ephemeral subagents for isolated, long-running, multi-step, or parallel tasks. Subagents execution provides.
+            - Fresh context: Each invocation creates a new agent instance with its own context.
+            - Autonomous execution: The subagent runs independently until completion.
+            - Single handoff: It returns one final report to the main agent.
+            - Configurable strategy: Use the default general-purpose subagent (enabled by default) or define custom subagents.
+            - Stateless messaging: Subagents are stateless and cannot send multiple messages back.
+            - Context and token efficiency: Heavy subtask work stays isolated and is compressed into a compact result.
 
-    ![Deepagent categories](assets/deepagent_categories.png)
+    4. Steering: The steering component gives humans control over agent behavior at runtime and sets filesystem permissions for agent work.
+        - Human-in-the-loop approval: 
+            - This gives you a runtime safety and control layer for destructive operations, expensive API calls, and interactive debugging.
+        - Interrupts
+
+    ![Deepagent categories](assets/agent_harness_capabilities.svg)
 
 - Middleware
     ![Deepagent Middleware One](assets/deepagent_middleware_1.png)
